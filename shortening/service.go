@@ -1,6 +1,6 @@
 package shortening
 
-import "github.com/tiago-kimura/url-shortener/internal/hashEncoder"
+//import "github.com/tiago-kimura/url-shortener/internal/hashEncoder"
 
 type Service interface {
 	ShortenUrl(url string) (string, error)
@@ -19,9 +19,9 @@ func NewShorteningService(repository Repository) ShorteningService {
 }
 
 func (s ShorteningService) ShortenUrl(url string) (string, error) {
-	urlId := hashEncoder.GenerateHashSHA(url)
+	//	urlId := hashEncoder.GenerateHashSHA(url)
 
-	return urlId, nil
+	return "urlId", nil
 }
 
 func (s ShorteningService) GetUrlOrigin(urlId string) (UrlShortener, error) {
