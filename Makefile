@@ -78,3 +78,15 @@ integration-tests: docker-build
 run: docker-build
 	@echo $(ECHOFLAGS) "$(OK_COLOR) ==> running shortener...$(NO_COLOR)"
 	@ROOT_DIR=$(ROOT_DIR) $(DOCKER) run --rm -i shortener < $(file)
+
+start:
+	@echo $(ECHOFLAGS) "$(OK_COLOR) ==> starting all containers...$(NO_COLOR)"
+	@ROOT_DIR=$(ROOT_DIR) $(DOCKER)-compose up --build -d
+
+stop:
+	@echo $(ECHOFLAGS) "$(OK_COLOR) ==> stoping all containers...$(NO_COLOR)"
+	@ROOT_DIR=$(ROOT_DIR) $(DOCKER)-compose down
+
+migrate:
+	@echo $(ECHOFLAGS) "$(OK_COLOR) ==> stoping all containers...$(NO_COLOR)"
+	@ROOT_DIR=$(ROOT_DIR) $(DOCKER) exec -it url-shortener-db mysql -u root -p < migrations/init.sql

@@ -5,8 +5,7 @@ import (
 )
 
 type UrlShortener struct {
-	UrlId     string
-	UrlOrigin string
-	CreateAt  time.Time
-	UpdateAt  time.Time
+	UrlId       string    `gorm:"primaryKey;index;size:10"`
+	UrlOriginal string    `gorm:"not null"`
+	CreateAt    time.Time `gorm:"autoCreateTime"`
 }
