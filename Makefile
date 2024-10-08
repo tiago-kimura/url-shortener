@@ -88,5 +88,5 @@ stop:
 	@ROOT_DIR=$(ROOT_DIR) $(DOCKER)-compose down
 
 migrate:
-	@echo $(ECHOFLAGS) "$(OK_COLOR) ==> stoping all containers...$(NO_COLOR)"
-	@ROOT_DIR=$(ROOT_DIR) $(DOCKER) exec -it url-shortener-db mysql -u root -p < migrations/init.sql
+	@echo $(ECHOFLAGS) "$(OK_COLOR) ==> running migrate...$(NO_COLOR)"
+	@ROOT_DIR=$(ROOT_DIR) $(DOCKER) exec -t url-shortener-db mysql -u root -p < migrations/init.sql

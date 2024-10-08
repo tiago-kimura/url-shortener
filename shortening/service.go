@@ -1,8 +1,16 @@
 package shortening
 
 import (
+	"database/sql"
+	"errors"
+	"strings"
+
 	"github.com/tiago-kimura/url-shortener/config"
 	"github.com/tiago-kimura/url-shortener/internal/hashEncode"
+)
+
+const (
+	https = "https://"
 )
 
 type Service interface {
@@ -30,21 +38,24 @@ func NewShorteningService(repository Repository, cache RedisCache, config config
 func (s ShorteningService) ShortenUrl(url string) (string, error) {
 	urlId := ""
 	var err error
-	// TODO: remove http/https
-	if len(url) > s.config.MaxLenthToShorten {
-		urlId = hashEncode.GenerateHashSHA256(url, s.config.MaxLenthToShorten)
-		urlShortener := UrlShortener{
-			UrlId:       urlId,
-			UrlOriginal: url,
-		}
-		err = s.rules.ProcessRules(urlShortener)
-		if err != nil {
-			return urlId, err
-		}
-		err = s.repository.PersistUrlShort(urlShortener)
+	urlShortener := UrlShortener{
+		UrlId:       urlId,
+		UrlOriginal: url,
 	}
+	err = s.rules.ProcessRules(urlShortener)
+	if err != nil {
+		return urlId, err
+	}
+	urlSlice := strings.Split(url, https)
+	urlId = hashEncode.GenerateHashMD5(urlSlice[1], s.config.MinLenthToShorten)
+	err = s.isUrlIdExist(urlId)
+	if err != nil {
+		return urlId, err
+	}
+	urlShortener.UrlId = urlId
+	err = s.repository.PersistUrlShort(urlShortener)
 
-	return urlId, err
+	return https + urlShortener.UrlId, err
 }
 
 func (s ShorteningService) GetUrlOriginal(urlId string) (UrlShortener, error) {
@@ -59,6 +70,20 @@ func (s ShorteningService) DeleteUrlShortener(urlId string) error {
 	err := s.repository.DeleteByUrlId(urlId)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (s ShorteningService) isUrlIdExist(urlId string) error {
+	existUrl, err := s.repository.GetByUrlId(urlId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+		return err
+	}
+	if existUrl.UrlOriginal != "" {
+		return errors.New("URL id already exists")
 	}
 	return nil
 }

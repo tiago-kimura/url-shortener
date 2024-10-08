@@ -41,19 +41,27 @@ func (r *HashExistsRule) ProcessRule(urlShortener UrlShortener) error {
 	return nil
 }
 
-type MaxLengthRule struct {
-	MaxLength int
+type MinLengthRule struct {
+	MinLength int
 }
 
-func (r *MaxLengthRule) ProcessRule(urlShortener UrlShortener) error {
-	if len(urlShortener.UrlOriginal) > r.MaxLength {
-		return errors.New("URL exceeds maximum length") // TODO: check
+func (r *MinLengthRule) ProcessRule(urlShortener UrlShortener) error {
+	if len(urlShortener.UrlOriginal) < r.MinLength {
+		return errors.New("URL does not have the minimum size")
 	}
 	return nil
 }
 
-func ProcessRule(urlShortener UrlShortener) error {
-	if len(strings.Trim(urlShortener.UrlOriginal, " ")) == 0 {
+type ValidUrl struct {
+}
+
+func (r *ValidUrl) ProcessRule(urlShortener UrlShortener) error {
+	if len(strings.TrimSpace(urlShortener.UrlOriginal)) == 0 {
+		return errors.New("URL cannot be null")
+	}
+
+	urlSlice := strings.Split(urlShortener.UrlOriginal, "https://")
+	if len(strings.Trim(urlSlice[1], " ")) == 0 {
 		return errors.New("URL cannot be null")
 	}
 	return nil

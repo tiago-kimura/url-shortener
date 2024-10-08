@@ -1,8 +1,6 @@
 package shortening
 
-import (
-	"gorm.io/gorm"
-)
+import "database/sql"
 
 type Repository interface {
 	PersistUrlShort(url UrlShortener) error
@@ -11,25 +9,44 @@ type Repository interface {
 }
 
 type RepositoryImpl struct {
-	db *gorm.DB
+	Db *sql.DB
 }
 
-func NewRepository(db *gorm.DB) *RepositoryImpl {
-	return &RepositoryImpl{db: db}
+func NewRepository(db *sql.DB) *RepositoryImpl {
+	return &RepositoryImpl{Db: db}
 }
 
 func (r *RepositoryImpl) PersistUrlShort(url UrlShortener) error {
-	return r.db.Create(&url).Error
+	stmt, err := r.Db.Prepare("INSERT INTO url_shortener (url_id, url_original) VALUES (?, ?)")
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(url.UrlId, url.UrlOriginal)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *RepositoryImpl) GetByUrlId(urlId string) (UrlShortener, error) {
 	var urlShortener UrlShortener
-	if err := r.db.First(&urlShortener, "url_id = ?", urlId).Error; err != nil {
+	stmt, err := r.Db.Prepare("Select * from url_shortener WHERE url_id =(?)")
+	if err != nil {
+		return urlShortener, err
+	}
+
+	err = stmt.QueryRow(urlId).Scan(&urlShortener.UrlId, &urlShortener.UrlOriginal, &urlShortener.CreatedAt)
+	if err != nil {
 		return urlShortener, err
 	}
 	return urlShortener, nil
 }
 
 func (r *RepositoryImpl) DeleteByUrlId(urlId string) error {
-	return r.db.Delete(&UrlShortener{}, "url_id = ?", urlId).Error
+	stmt, err := r.Db.Prepare("DELETE url_shortener WHERE url_id =(?)")
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(urlId)
+	return err
 }

@@ -18,7 +18,7 @@ type Config struct {
 	RedisPort         string
 	ServerPort        string
 	URLSalt           string
-	MaxLenthToShorten int
+	MinLenthToShorten int
 }
 
 func Load() *Config {
@@ -27,9 +27,9 @@ func Load() *Config {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	maxLenthToShorten, err := strconv.Atoi(os.Getenv("MAX_LENTH_TO_SHORTEN"))
+	minLenthToShorten, err := strconv.Atoi(os.Getenv("MIN_LENTH_TO_SHORTEN"))
 	if err != nil {
-		log.Fatalf("Error converting MAX_LENTH_TO_SHORTEN to int: %v", err)
+		log.Fatalf("Error converting MIN_LENTH_TO_SHORTEN to int: %v", err)
 	}
 
 	return &Config{
@@ -42,6 +42,6 @@ func Load() *Config {
 		RedisPort:         os.Getenv("REDIS_PORT"),
 		ServerPort:        os.Getenv("SERVER_PORT"),
 		URLSalt:           os.Getenv("URL_SALT"),
-		MaxLenthToShorten: maxLenthToShorten,
+		MinLenthToShorten: minLenthToShorten,
 	}
 }

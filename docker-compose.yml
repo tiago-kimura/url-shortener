@@ -14,9 +14,14 @@ services:
       - "3306:3306"
     volumes:
       - ./db_data:/var/lib/mysql
+    command:  --mysql-native-password=ON
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - url-shortener-network
-    command:  --mysql-native-password=ON
 
   redis:
     image: redis:alpine
